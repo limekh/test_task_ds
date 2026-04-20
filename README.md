@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ```
 python main.py
 ```
-Результат будет сохранен в файл `iris_stat.html`. Формат можно изменить в инициализации `summarizer` (`output_type="markdown"/"html"/xlsx"`), находящейся в `main.py`
+Результат будет сохранен в файл `iris_stat.html`. Формат можно изменить в инициализации `summarizer` (`output_type="markdown"/"html"/"xlsx"`), находящейся в `main.py`
 ### Запуск тестов
 ```
 python -m pytest tests/ -v
