@@ -1,5 +1,7 @@
 import pandas as pd
 
+from pathlib import Path
+
 
 class Summarizer:
     """
@@ -27,7 +29,7 @@ class Summarizer:
         
         return "categorical"
     
-    def calculate_column_stats(self, column_name: str, series: pd.Series):
+    def calculate_column_stats(self, column_name: str, series: pd.Series) -> dict:
         dtype = self.get_column_category(series)
         stats = {"Column": column_name, "Type": dtype}
 
@@ -56,3 +58,23 @@ class Summarizer:
 
         return stats
     
+    def get_summary(self) -> pd.DataFrame:
+        rows = [self.compute_column_stats(col, self.df[col]) for col in self.df.columns]
+        self.stats_df = pd.DataFrame(rows).set_index("Column")
+
+        return self.stats_df
+    
+    def get_report(self) -> str:
+        if self.stats_df is None:
+            self.get_summary()
+
+        filepath = Path(self.out_filename)
+
+        if self.output_type == "markdown":
+            pass
+        elif self.output_type == "xslx":
+            pass
+        elif self.output_type == "html":
+            pass
+        
+        return "test"
