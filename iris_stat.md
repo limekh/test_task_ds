@@ -3,5 +3,5 @@
 | sepal_length | numeric     |                35 |            0 |      0.00 | 4.3         | 7.9            |   5.84 |     5.80 | 5.0         |           0.00 |       0.69 |   0.83 |   1.30 |   0.14 |
 | sepal_width  | numeric     |                23 |            0 |      0.00 | 2.0         | 4.4            |   3.05 |     3.00 | 3.0         |           0.00 |       0.19 |   0.43 |   0.50 |   0.14 |
 | petal_length | numeric     |                43 |            0 |      0.00 | 1.0         | 6.9            |   3.76 |     4.35 | 1.5         |           0.00 |       3.11 |   1.76 |   3.50 |   0.47 |
-| petal_width  | numeric     |                22 |            0 |      0.00 | 0.1         | 2.5            |   1.20 |     1.30 | 0.2         |           0.00 |       0.58 |   0.76 |   1.50 |   0.64 |
+| petal_width  | numeric     |                22 |            0 |      0.00 | 0.1         | 2.5            |   1.20 |     1.30 | 0.2         |           0.00 |       0.58 |   0.76 |   1.50 |   0.63 |
 | class        | categorical |                 3 |            0 |      0.00 | Iris-setosa | Iris-virginica | nan    |   nan    | Iris-setosa |         nan    |     nan    | nan    | nan    | nan    |
