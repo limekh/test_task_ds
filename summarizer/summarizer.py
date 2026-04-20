@@ -59,7 +59,7 @@ class Summarizer:
         return stats
     
     def get_summary(self) -> pd.DataFrame:
-        rows = [self.compute_column_stats(col, self.df[col]) for col in self.df.columns]
+        rows = [self.calculate_column_stats(col, self.df[col]) for col in self.df.columns]
         self.stats_df = pd.DataFrame(rows).set_index("Column")
 
         return self.stats_df
@@ -71,10 +71,27 @@ class Summarizer:
         filepath = Path(self.out_filename)
 
         if self.output_type == "markdown":
-            pass
+            filepath = filepath.with_suffix(".md")
+            content = self.stats_df.to_markdown(float_format="%.2f")
+            filepath.write_text(content, encoding="utf-8")
+
         elif self.output_type == "xslx":
-            pass
+            filepath = filepath.with_suffix(".xslx")
+            with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
+                self.stats_df.to_excel(writer, sheet_name="Summary")
+
         elif self.output_type == "html":
-            pass
+            filepath = filepath.with_suffix(".html")
+            html_table = self.stats_df.to_html(float_format="%.2f")
+            full_html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>Summary</title></head>
+<body><h1>Summary statistics</h1>{html_table}</body>
+</html>"""
+            filepath.write_text(full_html, encoding="utf-8")
+
+        else:
+            raise ValueError(f"Unsupported report format type: {self.output_type}")
         
-        return "test"
+        return str(filepath.resolve())
+    
