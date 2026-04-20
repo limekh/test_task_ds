@@ -29,7 +29,7 @@ python -m pytest tests/ -v
 
 ### Структура проекта
 - summarizer/
-    - \__init\__.py
+    - \_\_init__.py
     - summarizer.py
 - tests/
     - test_summarizer.py
