@@ -42,3 +42,17 @@ class Summarizer:
             stats["Std"] = series.std()
             stats["IQR"] = series.quantile(0.75) - series.quantile(0.25)
             stats["CV"] = (stats["std"] / abs(stats["mean"]))
+
+        elif dtype == "boolean":
+            stats["Min"] = int(series.min())
+            stats["Max"] = int(series.max())
+            stats["Zero rows(%)"] = (~series.astype(bool)).mean() * 100
+
+        elif dtype in ("categorical", "datetime"):
+            stats["Min"] = series.min()
+            stats["Max"] = series.max()
+            stats["Mode"] = series.mode()
+            stats["Zero rows(%)"] = (~series.astype(bool)).mean() * 100
+
+        return stats
+    
