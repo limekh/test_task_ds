@@ -25,6 +25,20 @@ class Summarizer:
         return "categorical"
     
     @staticmethod
+    def get_min(series: pd.Series) -> any:
+        try:
+            return series.min()
+        except TypeError:
+            return None
+    
+    @staticmethod
+    def get_max(series: pd.Series) -> any:
+        try:
+            return series.max()
+        except TypeError:
+            return None
+    
+    @staticmethod
     def get_mode(series: pd.Series) -> any:
         mode_values = series.mode()
         return mode_values.iloc[0] if len(mode_values) > 0 else None
@@ -38,26 +52,26 @@ class Summarizer:
         stats["% nulls"] = (series.isna().mean() * 100) if len(series) > 0 else 0.0
 
         if dtype == "numeric":
-            stats["min"] = series.min()
-            stats["max"] = series.max()
+            stats["min"] = self.get_min(series)
+            stats["max"] = self.get_max(series)
             stats["mean"] = series.mean()
             stats["median"] = series.median()
             stats["mode"] = self.get_mode(series)
             stats["zero rows(%)"] = (series == 0).mean() * 100
             stats["variance"] = series.var()
-            stats["std"] = series.std()
+            stats["std"] = series.std(ddof=0) if len(series) > 0 else np.nan
             stats["IQR"] = series.quantile(0.75) - series.quantile(0.25)
             stats["CV"] = (stats["std"] / abs(stats["mean"])) if pd.notna(stats["mean"]) and stats["mean"] != 0 else np.nan
 
         elif dtype == "boolean":
-            stats["min"] = int(series.min())
-            stats["max"] = int(series.max())
+            stats["min"] = int(series.min()) if series.notna().any() else None
+            stats["max"] = int(series.max()) if series.notna().any() else None
             stats["mode"] = self.get_mode(series)
-            stats["zero rows(%)"] = (~series.astype(bool)).mean() * 100
+            stats["zero rows(%)"] = (~series).mean() * 100
 
         elif dtype in ("categorical", "datetime"):
-            stats["min"] = series.min()
-            stats["max"] = series.max()
+            stats["min"] = self.get_min(series)
+            stats["max"] = self.get_max(series)
             stats["mode"] = self.get_mode(series)
             stats["zero rows(%)"] = None
 
@@ -80,14 +94,14 @@ class Summarizer:
             content = self.stats_df.to_markdown(floatfmt=".2f")
             filepath.write_text(content, encoding="utf-8")
 
-        elif self.output_type == "xslx":
-            filepath = filepath.with_suffix(".xslx")
+        elif self.output_type == "xlsx":
+            filepath = filepath.with_suffix(".xlsx")
             with pd.ExcelWriter(filepath, engine="openpyxl") as writer:
                 self.stats_df.to_excel(writer, sheet_name="Summary")
 
         elif self.output_type == "html":
             filepath = filepath.with_suffix(".html")
-            html_table = self.stats_df.to_html(float_format=lambda x: f"{x:.2f}")
+            html_table = self.stats_df.to_html(float_format=lambda x: f"{x:.2f}" if pd.notna(x) else "")
             full_html = f"""<!DOCTYPE html>
 <html lang="ru">
 <head><meta charset="UTF-8"><title>Summary</title></head>
