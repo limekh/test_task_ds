@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from pathlib import Path
@@ -15,18 +16,12 @@ class Summarizer:
         self.stats_df: pd.DataFrame | None = None
 
     def get_column_category(self, series: pd.Series) -> str:
-        dtype = series.dtype
-        dtype_name = dtype.name
-
-        if dtype_name.startswith(('Int', 'UInt', 'Float')):
-            return "numeric"
-        
-        elif dtype_name == 'boolean':
+        if pd.api.types.is_bool_dtype(series):
             return "boolean"
-        
-        elif 'datetime' in dtype_name:
+        elif pd.api.types.is_numeric_dtype(series):
+            return "numeric"
+        elif pd.api.types.is_datetime64_any_dtype(series):
             return "datetime"
-        
         return "categorical"
     
     @staticmethod
@@ -38,28 +33,33 @@ class Summarizer:
         dtype = self.get_column_category(series)
         stats = {"Column": column_name, "Type": dtype}
 
+        stats["distinct_values"] = series.nunique()
+        stats["null_count"] = series.isna().sum()
+        stats["% nulls"] = (series.isna().mean() * 100) if len(series) > 0 else 0.0
+
         if dtype == "numeric":
-            stats["Min"] = series.min()
-            stats["Max"] = series.max()
-            stats["Mean"] = series.mean()
-            stats["Median"] = series.median()
-            stats["Mode"] = self.get_mode(series)
-            stats["Zero rows(%)"] = (series == 0).mean() * 100
-            stats["Variance"] = series.var()
-            stats["Std"] = series.std()
+            stats["min"] = series.min()
+            stats["max"] = series.max()
+            stats["mean"] = series.mean()
+            stats["median"] = series.median()
+            stats["mode"] = self.get_mode(series)
+            stats["zero rows(%)"] = (series == 0).mean() * 100
+            stats["variance"] = series.var()
+            stats["std"] = series.std()
             stats["IQR"] = series.quantile(0.75) - series.quantile(0.25)
-            stats["CV"] = (stats["std"] / abs(stats["mean"]))
+            stats["CV"] = (stats["std"] / abs(stats["mean"])) if pd.notna(stats["mean"]) and stats["mean"] != 0 else np.nan
 
         elif dtype == "boolean":
-            stats["Min"] = int(series.min())
-            stats["Max"] = int(series.max())
-            stats["Zero rows(%)"] = (~series.astype(bool)).mean() * 100
+            stats["min"] = int(series.min())
+            stats["max"] = int(series.max())
+            stats["mode"] = self.get_mode(series)
+            stats["zero rows(%)"] = (~series.astype(bool)).mean() * 100
 
         elif dtype in ("categorical", "datetime"):
-            stats["Min"] = series.min()
-            stats["Max"] = series.max()
-            stats["Mode"] = self.get_mode(series)
-            stats["Zero rows(%)"] = None
+            stats["min"] = series.min()
+            stats["max"] = series.max()
+            stats["mode"] = self.get_mode(series)
+            stats["zero rows(%)"] = None
 
         return stats
     
