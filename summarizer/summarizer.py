@@ -29,6 +29,11 @@ class Summarizer:
         
         return "categorical"
     
+    @staticmethod
+    def get_mode(series: pd.Series) -> any:
+        mode_values = series.mode()
+        return mode_values.iloc[0] if len(mode_values) > 0 else None
+    
     def calculate_column_stats(self, column_name: str, series: pd.Series) -> dict:
         dtype = self.get_column_category(series)
         stats = {"Column": column_name, "Type": dtype}
@@ -38,7 +43,7 @@ class Summarizer:
             stats["Max"] = series.max()
             stats["Mean"] = series.mean()
             stats["Median"] = series.median()
-            stats["Mode"] = series.mode()
+            stats["Mode"] = self.get_mode(series)
             stats["Zero rows(%)"] = (series == 0).mean() * 100
             stats["Variance"] = series.var()
             stats["Std"] = series.std()
@@ -53,8 +58,8 @@ class Summarizer:
         elif dtype in ("categorical", "datetime"):
             stats["Min"] = series.min()
             stats["Max"] = series.max()
-            stats["Mode"] = series.mode()
-            stats["Zero rows(%)"] = (~series.astype(bool)).mean() * 100
+            stats["Mode"] = self.get_mode(series)
+            stats["Zero rows(%)"] = None
 
         return stats
     
@@ -72,7 +77,7 @@ class Summarizer:
 
         if self.output_type == "markdown":
             filepath = filepath.with_suffix(".md")
-            content = self.stats_df.to_markdown(float_format="%.2f")
+            content = self.stats_df.to_markdown(floatfmt=".2f")
             filepath.write_text(content, encoding="utf-8")
 
         elif self.output_type == "xslx":
@@ -82,7 +87,7 @@ class Summarizer:
 
         elif self.output_type == "html":
             filepath = filepath.with_suffix(".html")
-            html_table = self.stats_df.to_html(float_format="%.2f")
+            html_table = self.stats_df.to_html(float_format=lambda x: f"{x:.2f}")
             full_html = f"""<!DOCTYPE html>
 <html lang="ru">
 <head><meta charset="UTF-8"><title>Summary</title></head>
