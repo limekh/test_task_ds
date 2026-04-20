@@ -12,4 +12,17 @@ class Summarizer:
         self.out_filename = out_filename
         self.stats_df: pd.DataFrame | None = None
 
-    
+    def get_column_category(self, series: pd.Series):
+        dtype = series.dtype
+        dtype_name = dtype.name
+
+        if dtype_name.startswith(('Int', 'UInt', 'Float')):
+            return "numeric"
+        
+        elif dtype_name == 'boolean':
+            return "boolean"
+        
+        elif 'datetime' in dtype_name:
+            return "datetime"
+        
+        return "categorical"
